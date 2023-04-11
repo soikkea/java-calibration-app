@@ -61,8 +61,8 @@ public class DefectivePixelCorrectionFilter implements Filter{
         if (pixels.isEmpty()) {
             return 0;
         }
-        var total = pixels.stream().reduce(0, (a,b) -> a + b);
-        return total / pixels.size();
+        var average = pixels.stream().mapToDouble(a -> a).average().orElse(0.0);
+        return (int) Math.round(average);
     }
     
 }
