@@ -12,7 +12,7 @@ public class RawImage {
         if (data.length != 2 * totalSize) {
             throw new IllegalArgumentException("Size does not match");
         }
-        var pixels = new int [totalSize];
+        var pixels = new int[totalSize];
         for (int i = 0; i < totalSize; i++) {
             var byteA = data[i * 2] & 0xFF;
             var byteB = data[i * 2 + 1] & 0xFF;
@@ -34,7 +34,9 @@ public class RawImage {
     }
 
     private final int width;
+
     private final int height;
+
     private final int[] pixels;
 
     public RawImage(int width, int height, int[] pixels) {
@@ -43,12 +45,23 @@ public class RawImage {
         this.pixels = pixels;
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     public int getPixelIndex(int x, int y) {
-        var index = x + y * width;
-        if (index > width * height) {
+        if (!isPixelInsideImage(x, y)) {
             throw new IllegalArgumentException(String.format("(%d, %d) outside image", x, y));
         }
-        return index;
+        return x + y * width;
+    }
+
+    public boolean isPixelInsideImage(int x, int y) {
+        return (x >= 0 && x < width && y >= 0 && y < height);
     }
 
     public int getPixel(int x, int y) {
