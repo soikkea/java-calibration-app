@@ -3,12 +3,49 @@
  */
 package calibration;
 
+import calibration.filters.DefectivePixelCorrectionFilter;
+import calibration.filters.OffsetRemovalFilter;
+import calibration.image.FileUtil;
+import calibration.image.RawImage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
+
+    private static final String DEFAULT_OUTPUT_PATH = "../out/calibrated.raw";
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        var outputPath = DEFAULT_OUTPUT_PATH;
+        if (args.length > 0) {
+            outputPath = args[0];
+        }
+        calibrate(outputPath);
+    }
+
+    public static void calibrate(String outputPath) {
+        try {
+            var originalImage = RawImage.readFromFile(FileUtil.ORIGINAL_FILE, RawImage.DEFAULT_IMAGE_WIDTH,
+                    RawImage.DEFAULT_IMAGE_HEIGHT);
+            var offsetImage = RawImage.readFromFile(FileUtil.OFFSET_FILE, RawImage.DEFAULT_IMAGE_WIDTH,
+                    RawImage.DEFAULT_IMAGE_HEIGHT);
+            var defectImage = RawImage.readFromFile(FileUtil.DEFECT_FILE, RawImage.DEFAULT_IMAGE_WIDTH,
+                    RawImage.DEFAULT_IMAGE_HEIGHT);
+
+            var offsetRemoval = new OffsetRemovalFilter(offsetImage);
+            var defectCorrector = new DefectivePixelCorrectionFilter(defectImage);
+
+            var calibrator = new Calibrator();
+            calibrator.addFilter(offsetRemoval);
+            calibrator.addFilter(defectCorrector);
+
+            calibrator.processImage(originalImage);
+
+            originalImage.writeToFile(outputPath);
+        } catch (Exception e) {
+            logger.error("Exception was thrown", e);
+        }
+
     }
 }
