@@ -2,6 +2,9 @@ package calibration.image;
 
 import java.io.IOException;
 
+/*
+ * Class for handling 16-bit grayscale images 
+ */
 public class RawImage {
 
     public static final int DEFAULT_IMAGE_WIDTH = 896;

@@ -37,7 +37,7 @@ public class JavaFxApp extends Application {
 
     private static Parent loadFXML(String fxml) throws IOException {
         var loader = new FXMLLoader(JavaFxApp.class.getClassLoader().getResource(fxml + ".fxml"));
-        getController(fxml).ifPresent(c -> loader.setController(c));
+        getController(fxml).ifPresent(loader::setController);
         return loader.load();
     }
 

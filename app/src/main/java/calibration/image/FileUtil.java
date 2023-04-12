@@ -13,10 +13,6 @@ import org.slf4j.LoggerFactory;
 
 public class FileUtil {
 
-    public static final String ORIGINAL_FILE = "../data/1_xray_frame_896x1088.raw";
-    public static final String OFFSET_FILE = "../data/2_offset_data_896x1088.raw";
-    public static final String DEFECT_FILE = "../data/3_defect_map_896x1088.raw";
-    
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     public static byte[] readBytes(String path, int size) throws IOException {
@@ -50,5 +46,6 @@ public class FileUtil {
         }
     }
 
-    private FileUtil() {}
+    private FileUtil() {
+    }
 }

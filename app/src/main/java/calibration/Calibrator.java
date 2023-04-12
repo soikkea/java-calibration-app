@@ -39,6 +39,9 @@ public class Calibrator {
         filters.add(filter);
     }
 
+    /*
+     * Applies next filter to result image.
+     */
     public void processStep() {
         currentStep++;
         if (isCalibrationCompleted()) {

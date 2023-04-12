@@ -6,6 +6,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.Pane;
 
+/*
+ * Canvas for displaying RawImages
+ */
 public class CanvasPane extends Pane {
 
     private final Canvas canvas;
