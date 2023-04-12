@@ -5,6 +5,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import calibration.Configuration;
 import calibration.image.RawImage;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -51,6 +52,12 @@ public class ConfigureController {
     private final ObjectProperty<RawImage> offsetsProperty = new SimpleObjectProperty<>();
     private final ObjectProperty<RawImage> defectsProperty = new SimpleObjectProperty<>();
 
+    private final Configuration configuration;
+
+    public ConfigureController(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
     public void initialize() {
         canvasPane = new CanvasPane();
         root.setCenter(canvasPane);
@@ -73,6 +80,12 @@ public class ConfigureController {
                 .bind(canCalibrate.not());
         var calibrateStatusProperty = canCalibrate.not().map(objectStatusToText);
         calibrateStatus.textProperty().bind(calibrateStatusProperty);
+
+        imageProperty.addListener((ob, ov, nv) -> configuration.setImage(nv));
+        offsetsProperty.addListener((ob, ov, nv) -> configuration.setOffsetImage(nv));
+        defectsProperty.addListener((ob, ov, nv) -> configuration.setDefectsImage(nv));
+
+        calibrateButton.setOnAction(e -> startCalibration());
     }
 
     private void loadImage(ObjectProperty<RawImage> property) {
@@ -89,10 +102,16 @@ public class ConfigureController {
                     RawImage.DEFAULT_IMAGE_HEIGHT);
             property.set(image);
             canvasPane.setImage(image);
-
         } catch (Exception e) {
             logger.error("Failed to load image", e);
         }
+    }
 
+    private void startCalibration() {
+        try {
+            JavaFxApp.setRoot(JavaFxApp.CALIBRATION_VIEW);
+        } catch (Exception e) {
+            throw new IllegalStateException("Unable to switch fields", e);
+        }
     }
 }
