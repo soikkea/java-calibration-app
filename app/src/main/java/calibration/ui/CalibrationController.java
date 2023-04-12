@@ -10,10 +10,13 @@ import calibration.Calibrator;
 import calibration.Configuration;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -31,6 +34,16 @@ public class CalibrationController {
             this.number = number;
             this.name = name;
         }
+
+        @Override
+        public String toString() {
+            var baseString = String.format("%d. %s", number, name);
+            var isCompleted = isCompletedProperty.get();
+            if (isCompleted) {
+                baseString += " ✔";
+            }
+            return baseString;
+        }
     }
 
     @FXML
@@ -40,7 +53,7 @@ public class CalibrationController {
     private Label calibrationStatusLabel;
 
     @FXML
-    private ListView<?> calibrationStepsList;
+    private ListView<CalibrationStep> calibrationStepsList;
 
     @FXML
     private BorderPane root;
@@ -53,6 +66,8 @@ public class CalibrationController {
     private CanvasPane canvasPane;
 
     private Calibrator calibrator;
+
+    private final IntegerProperty calibrationStepsDone = new SimpleIntegerProperty(0);
 
     public CalibrationController(Configuration configuration) {
         this.configuration = configuration;
@@ -67,11 +82,35 @@ public class CalibrationController {
 
         advanceCalibrationButton.setOnAction(e -> nextStep());
         saveImageButton.setOnAction(e -> saveImage());
+
+        var filters = calibrator.getFilters();
+        for (var i = 0; i < filters.size(); i++) {
+            var filter = filters.get(i);
+            var item = new CalibrationStep(i + 1, filter.getName());
+            item.isCompletedProperty.bind(calibrationStepsDone.greaterThanOrEqualTo(i + 1));
+            calibrationStepsList.getItems().add(item);
+        }
+        calibrationStepsList.setCellFactory(param -> new ListCell<>() {
+            @Override
+            public void updateItem(CalibrationStep item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    textProperty().unbind();
+                    setText(null);
+                } else {
+                    textProperty().bind(calibrationStepsDone.map(b -> item.toString()));
+                }
+            }
+        });
+
+        var calibrationDone = calibrationStepsDone.greaterThanOrEqualTo(calibrator.getFilters().size());
+        advanceCalibrationButton.disableProperty().bind(calibrationDone);
     }
 
     private void nextStep() {
         calibrator.processStep();
         Platform.runLater(() -> {
+            calibrationStepsDone.set(calibrationStepsDone.get() + 1);
             canvasPane.setImage(calibrator.getResult());
         });
     }

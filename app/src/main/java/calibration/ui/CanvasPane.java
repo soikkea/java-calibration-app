@@ -2,8 +2,6 @@ package calibration.ui;
 
 import calibration.image.RawImage;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.Pane;
