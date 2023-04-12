@@ -17,6 +17,8 @@ public class FileUtil {
 
     public static byte[] readBytes(String path, int size) throws IOException {
 
+        logger.info("Reading from file {}...", path);
+
         var buffer = new byte[size];
 
         try (var reader = new DataInputStream(new FileInputStream(new File(path)))) {

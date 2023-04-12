@@ -108,10 +108,12 @@ public class CalibrationController {
     }
 
     private void nextStep() {
-        calibrator.processStep();
-        Platform.runLater(() -> {
-            calibrationStepsDone.set(calibrationStepsDone.get() + 1);
-            canvasPane.setImage(calibrator.getResult());
+        JavaFxApp.executor.execute(() -> {
+            calibrator.processStep();
+            Platform.runLater(() -> {
+                calibrationStepsDone.set(calibrationStepsDone.get() + 1);
+                canvasPane.setImage(calibrator.getResult());
+            });
         });
     }
 
@@ -120,13 +122,13 @@ public class CalibrationController {
 
         var file = getSaveFile();
 
-        file.ifPresent(f -> {
+        file.ifPresent(f -> JavaFxApp.executor.execute(() -> {
             try {
                 image.writeToFile(f.toString());
             } catch (Exception e) {
                 logger.error("Failed to save file", e);
             }
-        });
+        }));
     }
 
     private Optional<File> getSaveFile() {

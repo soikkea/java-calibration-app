@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import calibration.Configuration;
 import calibration.image.RawImage;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -97,14 +98,18 @@ public class ConfigureController {
         if (file == null) {
             return;
         }
-        try {
-            var image = RawImage.readFromFile(file.toString(), RawImage.DEFAULT_IMAGE_WIDTH,
-                    RawImage.DEFAULT_IMAGE_HEIGHT);
-            property.set(image);
-            canvasPane.setImage(image);
-        } catch (Exception e) {
-            logger.error("Failed to load image", e);
-        }
+        JavaFxApp.executor.execute(() -> {
+            try {
+                final var image = RawImage.readFromFile(file.toString(), RawImage.DEFAULT_IMAGE_WIDTH,
+                        RawImage.DEFAULT_IMAGE_HEIGHT);
+                Platform.runLater(() -> {
+                    property.set(image);
+                    canvasPane.setImage(image);
+                });
+            } catch (Exception e) {
+                logger.error("Failed to load image", e);
+            }
+        });
     }
 
     private void startCalibration() {

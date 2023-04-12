@@ -4,6 +4,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import calibration.Configuration;
 import javafx.application.Application;
@@ -14,6 +20,8 @@ import javafx.stage.Stage;
 
 public class JavaFxApp extends Application {
 
+    private static final Logger logger = LoggerFactory.getLogger(JavaFxApp.class);
+
     private static Scene scene;
 
     public static final String CONFIGURATION_VIEW = "configure";
@@ -21,6 +29,8 @@ public class JavaFxApp extends Application {
 
     private static final Configuration CONFIGURATION = new Configuration();
     private static final Map<String, Object> CONTROLLERS = new HashMap<>();
+
+    static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     static {
         CONTROLLERS.put(CONFIGURATION_VIEW, new ConfigureController(CONFIGURATION));
@@ -52,5 +62,19 @@ public class JavaFxApp extends Application {
         stage.setTitle("Calibration App");
         stage.setScene(scene);
         stage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        logger.info("Shutting down ExecutorService...");
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdown();
+        }
     }
 }
