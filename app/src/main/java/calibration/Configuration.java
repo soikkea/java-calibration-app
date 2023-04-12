@@ -1,5 +1,7 @@
 package calibration;
 
+import calibration.filters.DefectivePixelCorrectionFilter;
+import calibration.filters.OffsetRemovalFilter;
 import calibration.image.RawImage;
 
 public class Configuration {
@@ -30,6 +32,26 @@ public class Configuration {
 
     public void setDefectsImage(RawImage defectsImage) {
         this.defectsImage = defectsImage;
+    }
+
+    public boolean areImagesLoaded() {
+        return image != null && offsetImage != null && defectsImage != null;
+    }
+
+    public Calibrator buildCalibrator() {
+        if (!areImagesLoaded()) {
+            throw new IllegalStateException("All images are not loaded");
+        }
+
+        var calibrator = new Calibrator(image);
+
+        var offsetFilter = new OffsetRemovalFilter(offsetImage);
+        calibrator.addFilter(offsetFilter);
+
+        var defectsFilter = new DefectivePixelCorrectionFilter(defectsImage);
+        calibrator.addFilter(defectsFilter);
+
+        return calibrator;
     }
 
 }

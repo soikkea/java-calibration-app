@@ -12,7 +12,7 @@ public class CanvasPane extends Pane {
 
     private final Canvas canvas;
 
-    private final ObjectProperty<RawImage> imageProperty = new SimpleObjectProperty<>();
+    private RawImage image;
 
     public CanvasPane() {
         super();
@@ -22,14 +22,14 @@ public class CanvasPane extends Pane {
         getChildren().add(canvas);
         canvas.widthProperty().bind(widthProperty());
         canvas.heightProperty().bind(heightProperty());
-        imageProperty.addListener((ob, ov, nv) -> drawImage());
         ChangeListener<Number> resizeListener = (ob, ov, nv) -> drawImage();
         widthProperty().addListener(resizeListener);
         heightProperty().addListener(resizeListener);
     }
 
     public void setImage(RawImage image) {
-        imageProperty.set(image);
+        this.image = image;
+        drawImage();
     }
 
     protected int convert16BitGreyscaleToARGB(int grey) {
@@ -40,7 +40,6 @@ public class CanvasPane extends Pane {
     }
 
     private void drawImage() {
-        var image = imageProperty.get();
         if (image == null) {
             return;
         }

@@ -2,6 +2,7 @@ package calibration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,21 @@ public class Calibrator {
 
     private final List<Filter> filters = new ArrayList<>();
 
-    private RawImage result = null;
+    private RawImage result;
+
+    private int currentStep = -1;
+
+    public Calibrator(RawImage initialImage) {
+        result = initialImage;
+    }
+
+    public List<Filter> getFilters() {
+        return filters;
+    }
+
+    public int getCurrentStep() {
+        return currentStep;
+    }
 
     public RawImage getResult() {
         return result;
@@ -25,20 +40,21 @@ public class Calibrator {
         filters.add(filter);
     }
 
-    public void processImage(RawImage image) {
-        var totalSteps = filters.size();
-        logger.info("Processing image with {} steps", totalSteps);
-
-        var currentStep = 1;
-
-        for (var filter : filters) {
-            logger.info("Starting filter {} ({}/{})", filter.getName(), currentStep, totalSteps);
-            image = filter.filterImage(image);
-            currentStep++;
+    public void processStep() {
+        currentStep++;
+        if (isCalibrationCompleted()) {
+            return;
         }
 
-        logger.info("Processing completed");
+        var totalSteps = filters.size();
+        var filter = filters.get(currentStep);
 
-        result = image;
+        logger.info("Running filter {} ({}/{})", filter.getName(), currentStep + 1, totalSteps);
+
+        result = filter.filterImage(result);
+    }
+
+    public boolean isCalibrationCompleted() {
+        return currentStep >= filters.size();
     }
 }
